@@ -58,8 +58,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 	}
 
 	@Override
-	public void onActivityResult(int requestCode, int resultCode,
-															 Intent resultData) {
+	public void onActivityResult(int requestCode, int resultCode, Intent resultData) {
 
 		// The ACTION_OPEN_DOCUMENT intent was sent with the request code
 		// READ_REQUEST_CODE. If the request code seen here doesn't match, it's the
