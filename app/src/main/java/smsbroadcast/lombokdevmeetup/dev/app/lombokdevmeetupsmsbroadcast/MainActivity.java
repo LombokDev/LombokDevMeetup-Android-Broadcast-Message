@@ -8,7 +8,6 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.telephony.SmsManager;
-import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -76,7 +75,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         startActivityForResult(intent, READ_REQUEST_CODE);
         break;
       case R.id.btnSend:
-        List<Msg> messages = new ArrayList<>();
         Stream.of(namePhones).forEach(namePhone -> {
           Map<String, String> values = new HashMap<>();
           values.put("name", namePhone.getName());
@@ -182,7 +180,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         int length = msg.length();
         if (length > MAX_SMS_MESSAGE_LENGTH) {
           ArrayList<String> messagelist = smsManager.divideMessage(msg);
-          Log.d("multipart", "Sending multipart message "+messagelist.toString()+" "+messagelist.size());
+          Log.d("multipart", "Sending multipart message " + messagelist.toString() + " " + messagelist.size());
           smsManager.sendMultipartTextMessage(no, null, messagelist, null, null);
         } else
           smsManager.sendTextMessage(no, null, msg, piSent, piDelivered);

@@ -1,2 +1,9 @@
 /.idea
 /build
+/.gradle
+/.project
+/.settings
+/app/.classpath
+/app/.project
+/app/debug
+/app/.settings
