@@ -1,12 +1,14 @@
 package smsbroadcast.lombokdevmeetup.dev.app.lombokdevmeetupsmsbroadcast;
 
 import android.app.Activity;
+import android.app.PendingIntent;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.telephony.SmsManager;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -37,6 +39,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
   private int msgCounter = 0;
   private TextView tvMsgCounter;
 
+  private static String SENT = "SMS_SENT";
+  private static String DELIVERED = "SMS_DELIVERED";
+  private static int MAX_SMS_MESSAGE_LENGTH = 160;
+  PendingIntent piSent;
+  PendingIntent piDelivered;
+
   private SmsManager smsManager = SmsManager.getDefault();
 
   private static final int READ_REQUEST_CODE = 42;
@@ -46,6 +54,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_main);
+    piSent = PendingIntent.getBroadcast(getApplicationContext(), 0, new Intent(SENT), 0);
+    piDelivered = PendingIntent.getBroadcast(getApplicationContext(), 0, new Intent(DELIVERED), 0);
     btnChooseFile = (Button) findViewById(R.id.btnChooseFile);
     btnSend = (Button) findViewById(R.id.btnSend);
     etMessage = (EditText) findViewById(R.id.etMsg);
@@ -80,11 +90,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
   @Override
   public void onActivityResult(int requestCode, int resultCode, Intent resultData) {
-
-    // The ACTION_OPEN_DOCUMENT intent was sent with the request code
-    // READ_REQUEST_CODE. If the request code seen here doesn't match, it's the
-    // response to some other intent, and the code below shouldn't run at all.
-
     if (requestCode == READ_REQUEST_CODE && resultCode == Activity.RESULT_OK) {
       Uri uri = null;
       if (resultData != null) {
@@ -174,9 +179,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
       String no = strings[0];
       String msg = strings[1];
       try {
-        smsManager.sendTextMessage(no, null, msg, null, null);
+        int length = msg.length();
+        if (length > MAX_SMS_MESSAGE_LENGTH) {
+          ArrayList<String> messagelist = smsManager.divideMessage(msg);
+          Log.d("multipart", "Sending multipart message "+messagelist.toString()+" "+messagelist.size());
+          smsManager.sendMultipartTextMessage(no, null, messagelist, null, null);
+        } else
+          smsManager.sendTextMessage(no, null, msg, piSent, piDelivered);
         return 1;
       } catch (Exception e) {
+        Log.d("exception", e.getMessage());
         return 0;
       }
     }
