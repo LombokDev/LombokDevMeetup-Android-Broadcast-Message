@@ -1,5 +1,6 @@
 package smsbroadcast.lombokdevmeetup.dev.app.lombokdevmeetupsmsbroadcast;
 
+import android.Manifest;
 import android.app.Activity;
 import android.app.PendingIntent;
 import android.content.Intent;
@@ -16,6 +17,8 @@ import android.widget.Switch;
 import android.widget.TextView;
 
 import com.annimon.stream.Stream;
+import com.gun0912.tedpermission.PermissionListener;
+import com.gun0912.tedpermission.TedPermission;
 import com.opencsv.CSVReader;
 
 import org.apache.commons.text.StrSubstitutor;
@@ -29,7 +32,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class MainActivity extends AppCompatActivity implements View.OnClickListener {
+public class MainActivity extends AppCompatActivity implements View.OnClickListener, PermissionListener {
 
   private Button btnChooseFile, btnSend;
   private EditText etMessage;
@@ -53,16 +56,30 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_main);
+
+    TedPermission.with(this)
+        .setPermissionListener(this)
+        .setDeniedMessage("Set permission manual kalo gitu!")
+        .setPermissions(requestThisPermissions())
+        .check();
+
     piSent = PendingIntent.getBroadcast(getApplicationContext(), 0, new Intent(SENT), 0);
     piDelivered = PendingIntent.getBroadcast(getApplicationContext(), 0, new Intent(DELIVERED), 0);
-    btnChooseFile = (Button) findViewById(R.id.btnChooseFile);
-    btnSend = (Button) findViewById(R.id.btnSend);
-    etMessage = (EditText) findViewById(R.id.etMsg);
-    swSapaNama = (Switch) findViewById(R.id.swSapaNama);
-    tvMsgCounter = (TextView) findViewById(R.id.tvMsgCounter);
+    btnChooseFile = findViewById(R.id.btnChooseFile);
+    btnSend = findViewById(R.id.btnSend);
+    etMessage = findViewById(R.id.etMsg);
+    swSapaNama = findViewById(R.id.swSapaNama);
+    tvMsgCounter = findViewById(R.id.tvMsgCounter);
 
     btnSend.setOnClickListener(this);
     btnChooseFile.setOnClickListener(this);
+  }
+
+  private String[] requestThisPermissions() {
+    return new String[]{
+        Manifest.permission.SEND_SMS,
+        Manifest.permission.READ_PHONE_STATE
+    };
   }
 
   @Override
@@ -111,6 +128,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
       }
     }
+  }
+
+  @Override
+  public void onPermissionGranted() {
+
+  }
+
+  @Override
+  public void onPermissionDenied(ArrayList<String> deniedPermissions) {
+
   }
 
   private class Msg {
